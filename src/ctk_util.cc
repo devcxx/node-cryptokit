@@ -7,7 +7,15 @@
 #include <set>
 #include <sstream>
 
-#include "ctk_image.h"
+#define DEV 0
+
+#if DEV
+#include "ctk_dev.h"
+#define CTK_IMG ctk_dev
+#else
+#include "ctk.h"
+#define CTK_IMG ctk
+#endif
 
 using namespace std;
 namespace {
@@ -57,7 +65,7 @@ bool CreateIUtil(std::string& strI, std::string& err) {
     unsigned char iv[17] = { 0 };
     char* jsonData = nullptr;
     int jsonDataLength = 0;
-    CreateIv((unsigned char*)ctk_image, g_fileSize,
+    CreateIv((unsigned char*)CTK_IMG, g_fileSize,
              iv, 16,
              &jsonData, &jsonDataLength);
     if (jsonDataLength > 0) {
@@ -79,7 +87,7 @@ bool CreateKUtil(const std::string& strV, const std::string& strI, const std::st
     g_iSet.erase(strI);
     unsigned char* key = nullptr;
     int keyLength = 0;
-    GetKey((unsigned char*)ctk_image, g_fileSize, strK.c_str(), &key, &keyLength);
+    GetKey((unsigned char*)CTK_IMG, g_fileSize, strK.c_str(), &key, &keyLength);
     if (keyLength > 0) {
         ik& ikTemp = getIk(nType);
         ikTemp.m_strI = strI;
