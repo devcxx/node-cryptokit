@@ -15,7 +15,7 @@ extern "C" {
 
 // 初始化 只初始化一次就可以了
 // 生成iv和key的图片路径
-bool CtkInitUtil(const std::string& strPath, std::string& err);
+bool CtkInitUtil(std::string& err);
 
 // 释放，程序退出时释放
 void CtkUnInitUtil();

@@ -9,55 +9,6 @@ using namespace Napi;
 using namespace std;
 const unsigned char kDefaultKey[] = "6w3uCqOVJJm9TNgmPeytA58gZl1ugptX";
 const unsigned char kDefaultIv[] = "AyvkkWOFyJh0eeQo";
-Napi::String Method(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-  MessageBox(0, 0, 0, 0);
-
-  const char* filename = "E:/workspace/electronProjects/cryptproject/CryptoKit.jpg";
-  char* buffer;
-  long size;
-  ifstream in(filename, ios::in | ios::binary | ios::ate);
-  size = in.tellg();
-  in.seekg(0, ios::beg);
-  buffer = new char[size];
-  in.read(buffer, size);
-  in.close();
-
-  CryptoKitInit();
-  unsigned char iv[17] = { 0 };
-  char* jsonData = nullptr;
-  int jsonDataLength = 0;
-  CreateIv((unsigned char*)buffer, size,
-           iv, 16,
-           &jsonData, &jsonDataLength);
-  if (jsonDataLength > 0) {
-      unsigned char* ciphertext = 0;
-      char* in = "aaa";
-      cout << "ciphertext before = " << in << endl;
-      int ciphertext_len = CryptoKitEncryptBase64((unsigned char*)in, 3, kDefaultKey, kDefaultIv, &ciphertext, AES_256_CBC);
-      cout << "ciphertext after = " << ciphertext << endl;;
-
-      unsigned char* decryptedtext = 0;
-      int decryptedtext_len = CryptoKitDecryptBase64(ciphertext, ciphertext_len, kDefaultKey, kDefaultIv, &decryptedtext, AES_256_CBC);
-
-      string straa = (char*)decryptedtext;
-      cout << "straa = " << straa << endl;;
-
-      CryptoKitFreeBuffer(decryptedtext);
-
-      CryptoKitFreeBuffer(ciphertext);
-  }
-
-
-
-
-  CryptoKitUnInit();
-  
-  cout << "the complete file is in a buffer";
-  
-  delete[] buffer;
-  return Napi::String::New(env, "world");
-}
 
 #define REQUIRE_ARGUMENT_STRING(i, var)                                                             \
     if (info.Length() <= (i) || !info[i].IsString()) {                                              \
@@ -77,11 +28,10 @@ Napi::String Method(const Napi::CallbackInfo& info) {
 Napi::Value ctkInit(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
-    REQUIRE_ARGUMENT_STRING(0, key);
 
     // 初始化
     std::string err;
-    bool ret = CtkInitUtil(key, err);
+    bool ret = CtkInitUtil(err);
     if (!ret)
         Napi::TypeError::New(env, err).ThrowAsJavaScriptException();
 

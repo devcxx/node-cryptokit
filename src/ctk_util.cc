@@ -7,11 +7,13 @@
 #include <set>
 #include <sstream>
 
+#include "ctk_image.h"
+
 using namespace std;
 namespace {
     const string kDKHeader = string("lGzT3mHESuNTFhY6");
     const int kKHeaderLength = 16;
-    unique_ptr<char> g_pFileData = nullptr;
+    //unique_ptr<char> g_pFileData = nullptr;
     long g_fileSize = 0;
     std::map<std::string, ik> g_ikMap; // <密钥版本号, iv-key>
     set<string> g_iSet;
@@ -39,16 +41,9 @@ namespace {
 }
     
 // 初始化
-bool CtkInitUtil(const std::string& strPath, std::string& err)
+bool CtkInitUtil(std::string& err)
 {
-    if (strPath.empty()) {
-        err = "init ctk failed, path is empty";
-        return false;
-    }
     CryptoKitInit();
-    if (nullptr == g_pFileData) {
-        g_pFileData = getFileContent(strPath, g_fileSize);
-    }
     return true;
 }
 
@@ -59,15 +54,10 @@ void CtkUnInitUtil()
 
 // 调用此函数必须保证加解密组件已经初始化
 bool CreateIUtil(std::string& strI, std::string& err) {
-    // const char* filename = "E:/workspace/electronProjects/cryptproject/Ctk.jpg";
-    if (nullptr == g_pFileData) {
-        err = "create i failed, file data is null";
-        return false;
-    }
     unsigned char iv[17] = { 0 };
     char* jsonData = nullptr;
     int jsonDataLength = 0;
-    CreateIv((unsigned char*)g_pFileData.get(), g_fileSize,
+    CreateIv((unsigned char*)ctk_image, g_fileSize,
              iv, 16,
              &jsonData, &jsonDataLength);
     if (jsonDataLength > 0) {
@@ -80,11 +70,6 @@ bool CreateIUtil(std::string& strI, std::string& err) {
 }
 
 bool CreateKUtil(const std::string& strV, const std::string& strI, const std::string& strK, const int16_t nType, std::string& err) {
-    if (nullptr == g_pFileData) {
-        err = "create k failed, file data is null";
-        return false;
-    }
-
     if (g_iSet.find(strI) == g_iSet.end()) {
         std::ostringstream oss;
         oss << "create k failed, can not find " << strI << " i" ;
@@ -94,7 +79,7 @@ bool CreateKUtil(const std::string& strV, const std::string& strI, const std::st
     g_iSet.erase(strI);
     unsigned char* key = nullptr;
     int keyLength = 0;
-    GetKey((unsigned char*)g_pFileData.get(), g_fileSize, strK.c_str(), &key, &keyLength);
+    GetKey((unsigned char*)ctk_image, g_fileSize, strK.c_str(), &key, &keyLength);
     if (keyLength > 0) {
         ik& ikTemp = getIk(nType);
         ikTemp.m_strI = strI;
