@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include "CryptoKit.h"
-#include <Windows.h>
 #include "ctk_util.h"
 
 using namespace Napi;
