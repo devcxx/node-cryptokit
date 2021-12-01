@@ -7,14 +7,16 @@
 #include <set>
 #include <sstream>
 
-#define DEV 0
+#define DEV 1
 
 #if DEV
 #include "ctk_dev.h"
 #define CTK_IMG ctk_dev
+#define CTK_IMG_SIZE 28733
 #else
 #include "ctk.h"
 #define CTK_IMG ctk
+#define CTK_IMG_SIZE 42153
 #endif
 
 using namespace std;
@@ -22,7 +24,7 @@ namespace {
     const string kDKHeader = string("lGzT3mHESuNTFhY6");
     const int kKHeaderLength = 16;
     //unique_ptr<char> g_pFileData = nullptr;
-    long g_fileSize = 0;
+    //long g_fileSize = 0;
     std::map<std::string, ik> g_ikMap; // <密钥版本号, iv-key>
     set<string> g_iSet;
     ik g_curHttpIk; // 当前最新的http iv-key
@@ -47,7 +49,7 @@ namespace {
         }
     }
 }
-    
+
 // 初始化
 bool CtkInitUtil(std::string& err)
 {
@@ -65,7 +67,7 @@ bool CreateIUtil(std::string& strI, std::string& err) {
     unsigned char iv[17] = { 0 };
     char* jsonData = nullptr;
     int jsonDataLength = 0;
-    CreateIv((unsigned char*)CTK_IMG, g_fileSize,
+    CreateIv((unsigned char*)CTK_IMG, CTK_IMG_SIZE,
              iv, 16,
              &jsonData, &jsonDataLength);
     if (jsonDataLength > 0) {
@@ -87,7 +89,7 @@ bool CreateKUtil(const std::string& strV, const std::string& strI, const std::st
     g_iSet.erase(strI);
     unsigned char* key = nullptr;
     int keyLength = 0;
-    GetKey((unsigned char*)CTK_IMG, g_fileSize, strK.c_str(), &key, &keyLength);
+    GetKey((unsigned char*)CTK_IMG, CTK_IMG_SIZE, strK.c_str(), &key, &keyLength);
     if (keyLength > 0) {
         ik& ikTemp = getIk(nType);
         ikTemp.m_strI = strI;
