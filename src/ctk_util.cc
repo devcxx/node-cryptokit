@@ -26,7 +26,7 @@ namespace {
     //unique_ptr<char> g_pFileData = nullptr;
     //long g_fileSize = 0;
     std::map<std::string, ik> g_ikMap; // <密钥版本号, iv-key>
-    set<string> g_iSet;
+    std::map<std::string, std::string> g_jsonIvMap; // <创建iv时生成的json, 创建iv时生成的iv>
     ik g_curHttpIk; // 当前最新的http iv-key
     ik g_curSocetIk; // 当前最新的socket iv-key
 
@@ -72,7 +72,7 @@ bool CreateIUtil(std::string& strI, std::string& err) {
              &jsonData, &jsonDataLength);
     if (jsonDataLength > 0) {
         strI = jsonData; // IV值
-        g_iSet.insert(strI);
+        g_jsonIvMap.insert(map<string, string>::value_type(jsonData, (char*)iv));
         
     }
     CryptoKitFreeBuffer((unsigned char*)jsonData);
@@ -80,19 +80,20 @@ bool CreateIUtil(std::string& strI, std::string& err) {
 }
 
 bool CreateKUtil(const std::string& strV, const std::string& strI, const std::string& strK, const int16_t nType, std::string& err) {
-    if (g_iSet.find(strI) == g_iSet.end()) {
+    if (g_jsonIvMap.find(strI) == g_jsonIvMap.end()) {
         std::ostringstream oss;
         oss << "create k failed, can not find " << strI << " i" ;
         err = oss.str();
         return false;
     }
-    g_iSet.erase(strI);
+    string strIV = g_jsonIvMap[strI];
+    g_jsonIvMap.erase(strI);
     unsigned char* key = nullptr;
     int keyLength = 0;
     GetKey((unsigned char*)CTK_IMG, CTK_IMG_SIZE, strK.c_str(), &key, &keyLength);
     if (keyLength > 0) {
         ik& ikTemp = getIk(nType);
-        ikTemp.m_strI = strI;
+        ikTemp.m_strI = strIV;
         ikTemp.m_strK = (char*)key;
         g_ikMap.insert(map<string, ik>::value_type(strV, ikTemp));
         CryptoKitFreeBuffer(key);
